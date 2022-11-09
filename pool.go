@@ -93,7 +93,7 @@ type Pool[T Element] struct {
 	// the application. Argument t is the time that the connection was returned
 	// to the pool. If the function returns an error, then the connection is
 	// closed.
-	TestOnBorrow func(ele T, t time.Time) error
+	TestOnBorrow func(e T, t time.Time) error
 
 	mu           sync.Mutex    // mu protects the following fields
 	closed       bool          // set to true when the pool is closed.
