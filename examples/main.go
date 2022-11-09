@@ -25,7 +25,7 @@ func main() {
 			return nc, nil
 		},
 		npool.WithMaxActive(2),
-		npool.WithMaxIdle(1),
+		npool.WithMaxIdle(2),
 		npool.WithWait(true),
 	)
 	var w = &sync.WaitGroup{}

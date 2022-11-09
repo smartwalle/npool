@@ -126,7 +126,7 @@ func New[T Element](dial func(ctx context.Context) (T, error), opts ...Option) *
 //
 // If the function completes without error, then the application must close the
 // returned connection.
-func (p *Pool[T]) Get(ctx context.Context) (Conn[T], error) {
+func (p *Pool[T]) Get(ctx context.Context) (*Conn[T], error) {
 	// wait until there is a vacant connection in the pool.
 	waited, err := p.waitVacantConn(ctx)
 	if err != nil {
@@ -191,7 +191,7 @@ func (p *Pool[T]) Get(ctx context.Context) (Conn[T], error) {
 		p.mu.Unlock()
 		return nil, err
 	}
-	return &poolConn[T]{p: p, e: e, created: time.Now()}, nil
+	return &Conn[T]{p: p, e: e, created: time.Now()}, nil
 }
 
 // Stats returns pool's statistics.
@@ -302,7 +302,7 @@ func (p *Pool[T]) waitVacantConn(ctx context.Context) (waited time.Duration, err
 	return 0, nil
 }
 
-func (p *Pool[T]) put(pc *poolConn[T], forceClose bool) error {
+func (p *Pool[T]) put(pc *Conn[T], forceClose bool) error {
 	p.mu.Lock()
 	if !p.closed && !forceClose {
 		pc.t = time.Now()
@@ -330,32 +330,12 @@ func (p *Pool[T]) put(pc *poolConn[T], forceClose bool) error {
 	return err
 }
 
-type poolConn[T Element] struct {
-	p          *Pool[T]
-	e          T
-	t          time.Time
-	created    time.Time
-	next, prev *poolConn[T]
-}
-
-func (pc *poolConn[T]) Element() T {
-	return pc.e
-}
-
-func (pc *poolConn[T]) Close() error {
-	return pc.p.put(pc, true)
-}
-
-func (pc *poolConn[T]) Release() {
-	pc.p.put(pc, false)
-}
-
 type idleList[T Element] struct {
 	count       int
-	front, back *poolConn[T]
+	front, back *Conn[T]
 }
 
-func (l *idleList[T]) pushFront(pc *poolConn[T]) {
+func (l *idleList[T]) pushFront(pc *Conn[T]) {
 	pc.next = l.front
 	pc.prev = nil
 	if l.count == 0 {
