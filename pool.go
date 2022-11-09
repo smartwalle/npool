@@ -181,7 +181,7 @@ func (p *Pool[T]) Get(ctx context.Context) (Conn[T], error) {
 
 	p.active++
 	p.mu.Unlock()
-	c, err := p.dial(ctx)
+	e, err := p.dial(ctx)
 	if err != nil {
 		p.mu.Lock()
 		p.active--
@@ -191,7 +191,7 @@ func (p *Pool[T]) Get(ctx context.Context) (Conn[T], error) {
 		p.mu.Unlock()
 		return nil, err
 	}
-	return &poolConn[T]{p: p, e: c, created: time.Now()}, nil
+	return &poolConn[T]{p: p, e: e, created: time.Now()}, nil
 }
 
 // Stats returns pool's statistics.
