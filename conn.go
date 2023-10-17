@@ -11,16 +11,16 @@ type Conn[T Element] struct {
 }
 
 // Element 获取实际对象
-func (pc *Conn[T]) Element() T {
-	return pc.e
+func (c *Conn[T]) Element() T {
+	return c.e
 }
 
 // Close 将该对象关闭
-func (pc *Conn[T]) Close() error {
-	return pc.p.put(pc, true)
+func (c *Conn[T]) Close() error {
+	return c.p.put(c, true)
 }
 
 // Release 将该对象放回连接池
-func (pc *Conn[T]) Release() {
-	pc.p.put(pc, false)
+func (c *Conn[T]) Release() {
+	c.p.put(c, false)
 }
